@@ -8,7 +8,7 @@ from shivu import application, sudo_users, collection, db, SUPPORT_CHAT, OWNER_I
 
 from telegraph import upload_file
 from pyrogram import filters
-from shivu import shivuu, collection
+from shivu import shivuu, collection, CHARA_CHANNEL_ID
 from pyrogram.types import InputMediaPhoto
 import os
 
@@ -24,14 +24,12 @@ format:- /upload reply character-name anime-name rarity-number
 
 use rarity number accordingly rarity Map
 
-rarity_map = {1: "⚪️ Common", 2: "🟣 Rare", 3: "🟡 Legendary", 4:"💮 Special Edition", 5: "🔮 Limited Edition",6: "🎐 Celestial"}
+rarity_map = {1: "⚪ Common", 2: "🟣 Rare", 3: "🟢 Medium", 4: "🟡 Legendary", 5: "💮 Special Edition", 6: "🔮 Limited Edition", 7: "🎐 Celestial Beauty", 8: "🪽 Divine Edition", 9: "💦 Wet Elegance", 10: "🎴 Cosplay"}
 """
 
 
 # Define the channel ID and rarity map
-CHARA_CHANNEL_ID = -1002117539029
-rarity_map = {1: "⚪️ Common", 2: "🟣 Rare", 3: "🟡 Legendary", 4:"💮 Special Edition", 5: "🔮 Limited Edition", 6: "🎐 Celestial"}
-
+rarity_map = {1: "⚪ Common", 2: "🟣 Rare", 3: "🟢 Medium", 4: "🟡 Legendary", 5: "💮 Special Edition", 6: "🔮 Limited Edition", 7: "🎐 Celestial Beauty", 8: "🪽 Divine Edition", 9: "💦 Wet Elegance", 10: "🎴 Cosplay"}
 
 from asyncio import Lock
 
@@ -76,7 +74,7 @@ async def find_available_id():
         return str(max(map(int, ids)) + 1).zfill(2)  # Return the next available ID
 
 # Command to upload character information
-@shivuu.on_message(filters.command(["wadd"]) & filters.user([7378476666, 7441146627, 6759666329, 6582168898, 5816107708, 7469481988, 7178373826]))
+@shivuu.on_message(filters.command(["wadd"]) & filters.user([7756901810, 7640076990, 7885908019, 7378476666]))
 async def ul(client, message):
     reply = message.reply_to_message
     if reply and (reply.photo or reply.document):
@@ -92,7 +90,7 @@ async def ul(client, message):
         
         # Validate rarity value
         if rarity not in rarity_map:
-            await message.reply_text("Invalid rarity value. Please use a value between 1 and 7.")
+            await message.reply_text("Invalid rarity value. Please use a value between 1 and 10.")
             return
         
         rarity_text = rarity_map[rarity]
@@ -194,7 +192,7 @@ UPDATES_HANDLER = CommandHandler('wupdate', updates, block=False)
 application.add_handler(UPDATES_HANDLER)
 
 
-@shivuu.on_message(filters.command("wdel") & filters.user([7378476666, 7469481988, 7178373826]))  # Restrict command to specific user
+@shivuu.on_message(filters.command("wdel") & filters.user([7756901810, 7640076990, 7885908019, 7378476666]))  # Restrict command to specific user
 async def delete_character(client, message):
     # Extract character ID from the command
     if len(message.command) != 2:
