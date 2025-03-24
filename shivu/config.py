@@ -6,7 +6,7 @@ class Config(object):
     sudo_users = "7885908019", "7640076990", "7756901810" 
     GROUP_ID =-1002640379822
     TOKEN = "7673948265:AAFfj9piGxd0e-0bdV-eePwnjd5hIRUyFXg" 
-    mongo_url = "mongodb+srv://naruhina:harshitkichut@cluster0.03pl6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" 
+    mongo_url = "mongodb+srv://noloves:naruto1179@nolove.yojms.mongodb.net/?retryWrites=true&w=majority&appName=nolove" 
     PHOTO_URL = "https://files.catbox.moe/0nb1p7.jpg" 
     SUPPORT_CHAT = "https://t.me/Anime_Circle_Club"
     UPDATE_CHAT = "https://t.me/+D_z2g--T1UJjOWM1"
