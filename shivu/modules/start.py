@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Constants for button labels and URLs
 ADD_BUTTON_TEXT = "ADD ME"
-ADD_BUTTON_URL = f'http://t.me/{BOT_USERNAME}?startgroup=new'
+ADD_BUTTON_URL = f'http://t.me/Madara_Husbando_grabber_Bot?startgroup=new'
 SUPPORT_BUTTON_TEXT = "SUPPORT"
 UPDATE_BUTTON_TEXT = "UPDATES"
 HELP_BUTTON_TEXT = "HELP"
