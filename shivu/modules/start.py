@@ -1,113 +1,153 @@
 import random
-from html import escape 
-
+from html import escape
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler
+from shivu import application, SUPPORT_CHAT, UPDATE_CHAT, BOT_USERNAME, db, GROUP_ID
+from shivu import pm_users as collection
+import logging
 
-from shivu import application, PHOTO_URL, SUPPORT_CHAT, UPDATE_CHAT, BOT_USERNAME, db, GROUP_ID
-from shivu import pm_users as collection 
 
+private = ["http://postimg.cc/0btBnb7t", "http://postimg.cc/Yh2PQ1LG", " http://postimg.cc/K4DVK9jh"]
+group= ["http://postimg.cc/PLDVdy9c", "http://postimg.cc/mPJ6xJXC", "http://postimg.cc/ZWCDM4cJ"]
+
+# Set up logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# Constants for button labels and URLs
+ADD_BUTTON_TEXT = "ADD ME"
+ADD_BUTTON_URL = f'http://t.me/{BOT_USERNAME}?startgroup=new'
+SUPPORT_BUTTON_TEXT = "SUPPORT"
+UPDATE_BUTTON_TEXT = "UPDATES"
+HELP_BUTTON_TEXT = "HELP"
+SOURCE_BUTTON_TEXT = "SOURCE"
+# Better to use GitHub
+
+# Message templates
+START_CAPTION = """*Heyyyy...* ✨
+*I am An Open Source Character Catcher Bot... Add me in your group, and I will send random characters after every 100 messages in the group. Use /guess to collect characters and check your collection with /Harem. So add me in your groups and collect your harem!*"""
+
+GROUP_CAPTION = "🎴 Alive!?... Connect to me in PM for more information."
+
+HELP_TEXT = """*Help Section:*
+*/guess* - To guess a character (works in groups only)
+*/fav* - Add your favorite character
+*/trade* - Trade characters
+*/gift* - Give a character from your collection to another user (works in groups only)
+*/collection* - View your collection
+*/topgroups* - See the top groups where people guess the most
+*/top* - View top users
+*/ctop* - Your chat's top users
+*/changetime* - Change character appearance time (works in groups only)"""
 
 async def start(update: Update, context: CallbackContext) -> None:
-    user_id = update.effective_user.id
-    first_name = update.effective_user.first_name
-    username = update.effective_user.username
+    """Send a welcome message when the command /start is issued."""
+    try:
+        user_id = update.effective_user.id
+        first_name = update.effective_user.first_name
+        username = update.effective_user.username
 
-    user_data = await collection.find_one({"_id": user_id})
+        # Update or insert user data
+        user_data = await collection.find_one({"_id": user_id})
+        
+        if user_data is None:
+            await collection.insert_one({
+                "_id": user_id,
+                "first_name": first_name,
+                "username": username
+            })
+            if GROUP_ID:
+                await context.bot.send_message(
+                    chat_id=GROUP_ID,
+                    text=f"New user Started The Bot..\n User: <a href='tg://user?id={user_id}'>{escape(first_name)}</a>",
+                    parse_mode='HTML'
+                )
+        else:
+            if user_data['first_name'] != first_name or user_data['username'] != username:
+                await collection.update_one(
+                    {"_id": user_id},
+                    {"$set": {"first_name": first_name, "username": username}}
+                )
 
-    if user_data is None:
-        
-        await collection.insert_one({"_id": user_id, "first_name": first_name, "username": username})
-        
-        await context.bot.send_message(chat_id=GROUP_ID, 
-                                       text=f"New user Started The Bot..\n User: <a href='tg://user?id={user_id}'>{escape(first_name)})</a>", 
-                                       parse_mode='HTML')
-    else:
-        
-        if user_data['first_name'] != first_name or user_data['username'] != username:
-            
-            await collection.update_one({"_id": user_id}, {"$set": {"first_name": first_name, "username": username}})
-
-    
-
-    if update.effective_chat.type== "private":
-        
-        
-        caption = f"""
-        ***Heyyyy...***
-
-***I am An Open Source Character Catcher Bot...​Add Me in Your group.. And I will send Random Characters After.. every 100 messages in Group... Use /guess to.. Collect that Characters in Your Collection.. and see Collection by using /Harem... So add in Your groups and Collect Your harem***
-        """
-        
+        # Create keyboard
         keyboard = [
-            [InlineKeyboardButton("ADD ME", url=f'http://t.me/{BOT_USERNAME}?startgroup=new')],
-            [InlineKeyboardButton("SUPPORT", url=f'https://t.me/{SUPPORT_CHAT}'),
-            InlineKeyboardButton("UPDATES", url=f'https://t.me/{UPDATE_CHAT}')],
-            [InlineKeyboardButton("HELP", callback_data='help')]
-            #[InlineKeyboardButton("SOURCE", url=f'https://github.com/MyNameIsShekhar/WAIFU-HUSBANDO-CATCHER')]
+            [InlineKeyboardButton(ADD_BUTTON_TEXT, url=ADD_BUTTON_URL)],
+            [
+                InlineKeyboardButton(SUPPORT_BUTTON_TEXT, url=f"https://t.me/+ZTeO__YsQoIwNTVl"),
+                InlineKeyboardButton(UPDATE_BUTTON_TEXT, url=f"https://t.me/Anime_P_F_P")
+            ],
+            [InlineKeyboardButton(HELP_BUTTON_TEXT, callback_data='help')],
+            [InlineKeyboardButton(SOURCE_BUTTON_TEXT, url=f"http://postimg.cc/bsFFs4YF")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        photo_url = random.choice(PHOTO_URL)
-
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=photo_url, caption=caption, reply_markup=reply_markup, parse_mode='markdown')
-
-    else:
-        photo_url = random.choice(PHOTO_URL)
-        keyboard = [
-            [InlineKeyboardButton("ADD ME", url=f'http://t.me/{BOT_USERNAME}?startgroup=new')],
-            [InlineKeyboardButton("SUPPORT", url=f'https://t.me/{SUPPORT_CHAT}'),
-            InlineKeyboardButton("UPDATES", url=f'https://t.me/{UPDATE_CHAT}')],
-            [InlineKeyboardButton("HELP", callback_data='help')],
-            [InlineKeyboardButton("SOURCE", url=f'https://github.com/MyNameIsShekhar/WAIFU-HUSBANDO-CATCHER')]
-        ]
         
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await context.bot.send_photo(chat_id=update.effective_chat.id, photo=photo_url, caption="🎴Alive!?... \n connect to me in PM For more information ",reply_markup=reply_markup )
+
+        # Send appropriate message based on chat type
+        if update.effective_chat.type == "private":
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=random.choice(private),
+                caption=START_CAPTION,
+                reply_markup=reply_markup,
+                parse_mode='markdown'
+            )
+        else:
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=random.choice(group),
+                caption=GROUP_CAPTION,
+                reply_markup=reply_markup
+            )
+
+    except Exception as e:
+        logger.error(f"Error in start handler: {e}")
+        if update.effective_chat.type == "private":
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Sorry, something went wrong. Please try again later."
+            )
 
 async def button(update: Update, context: CallbackContext) -> None:
+    """Handle button callbacks."""
     query = update.callback_query
     await query.answer()
 
-    if query.data == 'help':
-        help_text = """
-    ***Help Section:***
-    
-***/guess: To Guess character (only works in group)***
-***/fav: Add Your fav***
-***/trade : To trade Characters***
-***/gift: Give any Character from Your Collection to another user.. (only works in groups)***
-***/collection: To see Your Collection***
-***/topgroups : See Top Groups.. Ppl Guesses Most in that Groups***
-***/top: Too See Top Users***
-***/ctop : Your ChatTop***
-***/changetime: Change Character appear time (only works in Groups)***
-   """
-        help_keyboard = [[InlineKeyboardButton("⤾ Bᴀᴄᴋ", callback_data='back')]]
-        reply_markup = InlineKeyboardMarkup(help_keyboard)
-        
-        await context.bot.edit_message_caption(chat_id=update.effective_chat.id, message_id=query.message.message_id, caption=help_text, reply_markup=reply_markup, parse_mode='markdown')
+    try:
+        if query.data == 'help':
+            help_keyboard = [[InlineKeyboardButton("⤾ Back", callback_data='back')]]
+            reply_markup = InlineKeyboardMarkup(help_keyboard)
 
-    elif query.data == 'back':
+            await query.edit_message_caption(
+                caption=HELP_TEXT,
+                reply_markup=reply_markup,
+                parse_mode='markdown'
+            )
 
-        caption = f"""
-        ***Hoyyyy...*** ✨
+        elif query.data == 'back':
+            keyboard = [
+                [InlineKeyboardButton(ADD_BUTTON_TEXT, url=ADD_BUTTON_URL)],
+                [
+                    InlineKeyboardButton(SUPPORT_BUTTON_TEXT, url=f"https://t.me/+ZTeO__YsQoIwNTVl"),
+                    InlineKeyboardButton(UPDATE_BUTTON_TEXT, url=f"https://t.me/Anime_P_F_P")
+                ],
+                [InlineKeyboardButton(HELP_BUTTON_TEXT, callback_data='help')],
+                [InlineKeyboardButton(SOURCE_BUTTON_TEXT, url=f"http://postimg.cc/bsFFs4YF")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
-***I am An Open Source Character Catcher Bot..​Add Me in Your group.. And I will send Random Characters After.. every 100 messages in Group... Use /guess to.. Collect that Characters in Your Collection.. and see Collection by using /Harem... So add in Your groups and Collect Your harem***
-        """
+            await query.edit_message_caption(
+                caption=START_CAPTION,
+                reply_markup=reply_markup,
+                parse_mode='markdown'
+            )
 
-        
-        keyboard = [
-            [InlineKeyboardButton("ADD ME", url=f'http://t.me/{BOT_USERNAME}?startgroup=new')],
-            [InlineKeyboardButton("SUPPORT", url=f'https://t.me/{SUPPORT_CHAT}'),
-            InlineKeyboardButton("UPDATES", url=f'https://t.me/{UPDATE_CHAT}')],
-            [InlineKeyboardButton("HELP", callback_data='help')],
-            [InlineKeyboardButton("SOURCE", url=f'https://github.com/MyNameIsShekhar/WAIFU-HUSBANDO-CATCHER')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+    except Exception as e:
+        logger.error(f"Error in button handler: {e}")
+        await query.edit_message_text(text="Sorry, something went wrong. Please try again.")
 
-        await context.bot.edit_message_caption(chat_id=update.effective_chat.id, message_id=query.message.message_id, caption=caption, reply_markup=reply_markup, parse_mode='markdown')
-
-
+# Add handlers
 application.add_handler(CallbackQueryHandler(button, pattern='^help$|^back$', block=False))
-start_handler = CommandHandler('start', start, block=False)
-application.add_handler(start_handler)
+application.add_handler(CommandHandler('start', start, block=False))
